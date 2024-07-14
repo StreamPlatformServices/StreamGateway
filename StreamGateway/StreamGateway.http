@@ -1,0 +1,6 @@
+@StreamGateway_HostAddress = http://localhost:5201
+
+GET {{StreamGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
