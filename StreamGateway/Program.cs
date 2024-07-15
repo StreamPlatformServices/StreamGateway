@@ -47,6 +47,19 @@ builder.Services.AddTransient<IUriContract, UriService>();
 
 builder.Services.AddContentMetadataServiceAPI();
 
+//TODO: Use safe cors policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.WithOrigins("*")
+                  .AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
      {
@@ -71,6 +84,8 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "StreamGateway API v1");
     });
+
+    app.UseCors("AllowAll");
 }
 
 app.UseHttpsRedirection();
