@@ -42,5 +42,10 @@ namespace StreamGateway.Services.Implementations
                 throw new TaskCanceledException("The upload task was canceled.", ex);
             }
         }
+
+        public async Task RemoveImageAsync(string fileName)
+        {
+            await _fileUploader.RemoveFileAsync(IMAGE_FOLDER_NAME, $"{fileName}{JPG_EXTENSION}");
+        }
     }
 }

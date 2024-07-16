@@ -5,6 +5,7 @@ namespace StreamGatewayContracts.IntegrationContracts
     //TODO: Move to another file???
     public enum UploadState
     {
+        NoFile,
         InProgress,
         Success,
         Failed

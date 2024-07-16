@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using StreamGateway.Services.Implementations;
 using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayContracts.IntegrationContracts.Video;
 
@@ -43,6 +42,11 @@ namespace StreamGateway.Services.Interfaces
                 //TODO: Handle canceling in streaming and in upload!!!!!!!!!! ???
                 throw new TaskCanceledException("The upload task was canceled.", ex);
             }
+        }
+
+        public async Task RemoveVideoAsync(string fileName)
+        {
+            await _fileUploader.RemoveFileAsync(VIDEO_FOLDER_NAME, $"{fileName}{MP4_EXTENSION}");
         }
     }
 }

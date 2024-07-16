@@ -12,6 +12,7 @@ namespace StreamGateway.Controllers
     [Route("image")]
     public class ImageController : ControllerBase
     {
+
         private readonly ILogger<ImageController> _logger;
         private readonly IImageStreamContract _imageStreamService;
         private readonly IImageUploadContract _imageUploadService;
@@ -32,6 +33,7 @@ namespace StreamGateway.Controllers
         [HttpGet("{contentId}")]
         public IActionResult StreamImage([FromRoute] Guid contentId)
         {
+            _logger.LogInformation("Start stream image.");
             try
             {
                 //FileStream is created with flag useAsync which enables thread non-blocking i/o operations and streaming operations //TODO: test it!!! 
@@ -62,6 +64,9 @@ namespace StreamGateway.Controllers
                 return BadRequest("File not provided or empty");
             }
 
+            await _contentMetadataContract.SetImageUploadStateAsync(contentId, UploadState.InProgress);
+            _logger.LogInformation("Start upload image.");
+
             try
             {
                 using (var memoryStream = new MemoryStream())
@@ -91,6 +96,28 @@ namespace StreamGateway.Controllers
                 
             //}
 
+        }
+
+        [HttpDelete("{contentId}")]
+        public async Task<IActionResult> RemoveImage([FromRoute] Guid contentId)
+        {
+            _logger.LogInformation("Start remove image.");
+            try
+            { 
+                await _imageUploadService.RemoveImageAsync(contentId.ToString());
+                await _contentMetadataContract.SetImageUploadStateAsync(contentId, UploadState.NoFile);
+                _logger.LogInformation("Image removed successfully!");
+                return Ok("Image removed successfully!");
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound("Image file not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred while removing image. Error message: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while removing image. Error message: {ex.Message}");
+            }
         }
 
         //[HttpPost("upload")]

@@ -13,6 +13,7 @@ namespace StreamGateway.Controllers
     public class VideoController : ControllerBase
     {
         private readonly ILogger<VideoController> _logger;
+        //TODO: Te kontrakty video i image napewno mozna lepiej zaprojektowac!
         private readonly IVideoStreamContract _videoStreamService; //TODO: change name to contract
         private readonly IVideoUploadContract _videoUploadService;
         private readonly IContentMetadataContract _contentMetadataContract;
@@ -66,6 +67,8 @@ namespace StreamGateway.Controllers
                 return BadRequest("File not provided or empty");
             }
 
+            await _contentMetadataContract.SetVideoUploadStateAsync(contentId, UploadState.InProgress);
+
             try
             {
                 using (var memoryStream = new MemoryStream())
@@ -97,6 +100,28 @@ namespace StreamGateway.Controllers
             //{
 
             //}
+        }
+
+        [HttpDelete("{contentId}")]
+        public async Task<IActionResult> RemoveVideo([FromRoute] Guid contentId)
+        {
+            _logger.LogInformation("Start remove image.");
+            try
+            {
+                await _videoUploadService.RemoveVideoAsync(contentId.ToString());
+                await _contentMetadataContract.SetVideoUploadStateAsync(contentId, UploadState.NoFile);
+                _logger.LogInformation("Image removed successfully!");
+                return Ok("Image removed successfully!");
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound("Image file not found.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred while removing image. Error message: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while removing image. Error message: {ex.Message}");
+            }
         }
     }
 }
