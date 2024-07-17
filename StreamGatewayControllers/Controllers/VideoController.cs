@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayContracts.IntegrationContracts.Video;
+using StreamGatewayControllers.Models;
 using StreamGatewayCoreUtilities.CommonExceptions;
 using System.Net;
 
@@ -46,14 +47,14 @@ namespace StreamGateway.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An error occurred while gettting image stream. Error message: {ex.Message}");
+                _logger.LogError($"An error occurred while gettting video stream. Error message: {ex.Message}");
                 return StatusCode((int)HttpStatusCode.InternalServerError, $"Internal server error: {ex.Message}");
             }
             
         }
 
-        [HttpPost("{contentId}")]
-        public async Task<IActionResult> UploadVideo([FromRoute] Guid contentId, [FromForm(Name = "file")] IFormFile formFile)
+        [HttpPost("{videoFileId}")]
+        public async Task<IActionResult> UploadVideo([FromRoute] Guid videoFileId, [FromForm(Name = "file")] IFormFile formFile)
         {
             //TODO: Check Exception on the middleware side and send video state update to failed!!???? 
             //What types of problems can occur on the middleware or json converter side??????
@@ -67,7 +68,7 @@ namespace StreamGateway.Controllers
                 return BadRequest("File not provided or empty");
             }
 
-            await _contentMetadataContract.SetVideoUploadStateAsync(contentId, UploadState.InProgress);
+            var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
 
             try
             {
@@ -76,23 +77,25 @@ namespace StreamGateway.Controllers
                     await formFile.CopyToAsync(memoryStream);
                     memoryStream.Position = 0;
 
-                    await _videoUploadService.UploadVideoAsync(contentId.ToString(), memoryStream);
+                    await _videoUploadService.UploadVideoAsync(videoFileId.ToString(), memoryStream);
                 }
 
-                _logger.LogInformation("Video uploaded successfully for contentId: {ContentId}", contentId);
-                await _contentMetadataContract.SetVideoUploadStateAsync(contentId, UploadState.Success);
+                _logger.LogInformation("Video uploaded successfully file id: {videoFileId}", videoFileId);
 
-                return Ok("File uploaded successfully");
+                response.Message = "File uploaded successfully";
+                response.Result.VideoFileId = videoFileId;
+
+                return Ok(response);
             }
             catch (ConflictException ex)
             {
-                //TODO: Change state to failed?? Maybe not.. maybe log Fatal or something
+                //TODO: maybe log Fatal or something
+                response.Message = ex.Message;
                 return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
-                await _contentMetadataContract.SetVideoUploadStateAsync(contentId, UploadState.Failed);
-
+                response.Message = ex.ToString();
                 _logger.LogError($"An error occurred while uploading video. Error message: {ex.Message}");
                 return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while uploading video. Error message: {ex.Message}");
             }
@@ -103,24 +106,24 @@ namespace StreamGateway.Controllers
         }
 
         [HttpDelete("{contentId}")]
-        public async Task<IActionResult> RemoveVideo([FromRoute] Guid contentId)
+        public async Task<IActionResult> RemoveVideo([FromRoute] Guid fileId)
         {
-            _logger.LogInformation("Start remove image.");
+            _logger.LogInformation("Start remove video.");
             try
             {
-                await _videoUploadService.RemoveVideoAsync(contentId.ToString());
-                await _contentMetadataContract.SetVideoUploadStateAsync(contentId, UploadState.NoFile);
-                _logger.LogInformation("Image removed successfully!");
-                return Ok("Image removed successfully!");
+                await _videoUploadService.RemoveVideoAsync(fileId.ToString());
+                await _contentMetadataContract.SetVideoUploadStateAsync(fileId, UploadState.NoFile);
+                _logger.LogInformation("Video removed successfully!");
+                return Ok("Video removed successfully!");
             }
             catch (FileNotFoundException)
             {
-                return NotFound("Image file not found.");
+                return NotFound("Video file not found.");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An error occurred while removing image. Error message: {ex.Message}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while removing image. Error message: {ex.Message}");
+                _logger.LogError($"An error occurred while removing video. Error message: {ex.Message}");
+                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while removing video. Error message: {ex.Message}");
             }
         }
     }

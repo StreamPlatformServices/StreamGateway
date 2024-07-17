@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayContracts.IntegrationContracts.Image;
+using StreamGatewayControllers.Models;
 using StreamGatewayCoreUtilities.CommonExceptions;
 using System.Net;
 
@@ -51,8 +52,8 @@ namespace StreamGateway.Controllers
             }
         }
 
-        [HttpPost("{contentId}")]
-        public async Task<IActionResult> UploadImage([FromRoute] Guid contentId, [FromForm(Name = "file")] IFormFile formFile)
+        [HttpPost("{imageFileId}")]
+        public async Task<IActionResult> UploadImage([FromRoute] Guid imageFileId, [FromForm(Name = "file")] IFormFile formFile)
         {
             if (!Request.HasFormContentType)
             {
@@ -64,7 +65,8 @@ namespace StreamGateway.Controllers
                 return BadRequest("File not provided or empty");
             }
 
-            await _contentMetadataContract.SetImageUploadStateAsync(contentId, UploadState.InProgress);
+            var response = new ResponseModel<ImageUploadResponseModel> { Result = new ImageUploadResponseModel() };
+
             _logger.LogInformation("Start upload image.");
 
             try
@@ -74,22 +76,26 @@ namespace StreamGateway.Controllers
                     await formFile.CopyToAsync(memoryStream);
                     memoryStream.Position = 0;
 
-                    await _imageUploadService.UploadImageAsync(contentId.ToString(), memoryStream);
+                    await _imageUploadService.UploadImageAsync(imageFileId.ToString(), memoryStream);
                 }
 
-                _logger.LogInformation("Image uploaded successfully for contentId: {ContentId}", contentId);
-                await _contentMetadataContract.SetImageUploadStateAsync(contentId, UploadState.Success);
-                return Ok("File uploaded successfully");
+                _logger.LogInformation("Image uploaded successfully file id: {imageFileId}", imageFileId);
+
+                response.Message = "File uploaded successfully";
+                response.Result.ImageFileId = imageFileId;
+
+                return Ok(response);
             }
             catch (ConflictException ex)
             {
+                response.Message = ex.Message;
                 return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"An error occurred while uploading image. Error message: {ex.Message}");
-                await _contentMetadataContract.SetImageUploadStateAsync(contentId, UploadState.Failed);
-                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while uploading video. Error message: {ex.Message}");
+                response.Message = ex.Message;
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
             //catch (TaskCanceledException)
             //{
