@@ -11,9 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamGatewayContracts", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamServiceMock", "StreamServiceMock\StreamServiceMock.csproj", "{9D5FCF0C-1528-4F0E-B35E-D828A0363919}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamGatewayCoreUtilities", "StreamGatewayCoreUtilities\StreamGatewayCoreUtilities.csproj", "{327F52B0-0BC9-44AA-886F-ED8B87D92F3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamGatewayCoreUtilities", "StreamGatewayCoreUtilities\StreamGatewayCoreUtilities.csproj", "{327F52B0-0BC9-44AA-886F-ED8B87D92F3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentMetadataServiceAPI", "ContentMetadataServiceAPI\ContentMetadataServiceAPI.csproj", "{42B49C43-66C4-42AF-A0F9-DF61D1A60112}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContentMetadataServiceAPI", "ContentMetadataServiceAPI\ContentMetadataServiceAPI.csproj", "{42B49C43-66C4-42AF-A0F9-DF61D1A60112}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncryptionService", "EncryptionService\EncryptionService.csproj", "{437C2A85-1C17-4E77-98A7-E06E152042EF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyServiceAPI", "..\LicenseService\KeyServiceAPI\KeyServiceAPI.csproj", "{28067F50-9A18-4BB3-AF22-892F49027186}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,14 @@ Global
 		{42B49C43-66C4-42AF-A0F9-DF61D1A60112}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42B49C43-66C4-42AF-A0F9-DF61D1A60112}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42B49C43-66C4-42AF-A0F9-DF61D1A60112}.Release|Any CPU.Build.0 = Release|Any CPU
+		{437C2A85-1C17-4E77-98A7-E06E152042EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{437C2A85-1C17-4E77-98A7-E06E152042EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{437C2A85-1C17-4E77-98A7-E06E152042EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{437C2A85-1C17-4E77-98A7-E06E152042EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28067F50-9A18-4BB3-AF22-892F49027186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28067F50-9A18-4BB3-AF22-892F49027186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28067F50-9A18-4BB3-AF22-892F49027186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28067F50-9A18-4BB3-AF22-892F49027186}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

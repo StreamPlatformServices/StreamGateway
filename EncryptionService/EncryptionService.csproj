@@ -7,12 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\EncryptionService\EncryptionService.csproj" />
-    <ProjectReference Include="..\StreamGatewayContracts\StreamGatewayContracts.csproj" />
+    <ProjectReference Include="..\..\LicenseService\KeyServiceAPI\KeyServiceAPI.csproj" />
     <ProjectReference Include="..\StreamGatewayCoreUtilities\StreamGatewayCoreUtilities.csproj" />
   </ItemGroup>
 

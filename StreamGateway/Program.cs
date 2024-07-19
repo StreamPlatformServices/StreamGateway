@@ -1,4 +1,6 @@
 ﻿using APIGatewayMain.ServiceCollectionExtensions;
+using EncryptionService;
+using KeyServiceAPI;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 using StreamGateway.Services.Implementations;
@@ -36,6 +38,8 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 // Add services to the container.
+builder.Services.AddTransient<IKeyServiceClient, KeyServiceClient>();
+builder.Services.AddTransient<IFileEncryptor, FileEncryptor>();
 builder.Services.AddTransient<IFileUploader, FileUploader>();
 builder.Services.AddTransient<IImageStreamContract, ImageStreamService>(); //TODO: Change service to Contract in name, move to extension methods
 builder.Services.AddTransient<IImageUploadContract, ImageUploadService>();

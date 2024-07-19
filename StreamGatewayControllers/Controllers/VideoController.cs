@@ -1,3 +1,4 @@
+using EncryptionService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,17 +19,20 @@ namespace StreamGateway.Controllers
         private readonly IVideoStreamContract _videoStreamService; //TODO: change name to contract
         private readonly IVideoUploadContract _videoUploadService;
         private readonly IContentMetadataContract _contentMetadataContract;
+        private readonly IFileEncryptor _fileEncryptor;
 
         public VideoController(
             ILogger<VideoController> logger,
             IVideoStreamContract videoStreamService,
             IVideoUploadContract videoUploadService,
-            IContentMetadataContract contentMetadataContract)
+            IContentMetadataContract contentMetadataContract,
+            IFileEncryptor fileEncryptor)
         {
             _logger = logger;
             _videoStreamService = videoStreamService;
             _videoUploadService = videoUploadService;
             _contentMetadataContract = contentMetadataContract;
+            _fileEncryptor = fileEncryptor;
         }
 
         [HttpGet("{contentId}")] //TODO: Maybe make this endpoints less obvious??
@@ -77,7 +81,9 @@ namespace StreamGateway.Controllers
                     await formFile.CopyToAsync(memoryStream);
                     memoryStream.Position = 0;
 
-                    await _videoUploadService.UploadVideoAsync(videoFileId.ToString(), memoryStream);
+                    var encryptedStream = await _fileEncryptor.EncryptAES(videoFileId, memoryStream);
+
+                    await _videoUploadService.UploadVideoAsync(videoFileId.ToString(), encryptedStream);
                 }
 
                 _logger.LogInformation("Video uploaded successfully file id: {videoFileId}", videoFileId);

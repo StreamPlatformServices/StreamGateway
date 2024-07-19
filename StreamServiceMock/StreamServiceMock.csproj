@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EncryptionService\EncryptionService.csproj" />
     <ProjectReference Include="..\StreamGatewayContracts\StreamGatewayContracts.csproj" />
     <ProjectReference Include="..\StreamGatewayCoreUtilities\StreamGatewayCoreUtilities.csproj" />
   </ItemGroup>

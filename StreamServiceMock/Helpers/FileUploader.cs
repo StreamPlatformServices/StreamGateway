@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using EncryptionService;
+using Microsoft.Extensions.Logging;
 using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayCoreUtilities.CommonExceptions;
 using System.Runtime.InteropServices;
@@ -10,7 +11,8 @@ namespace StreamGateway.Services.Implementations
         private readonly ILogger<FileUploader> _logger;
         private readonly string _baseDirectory;
 
-        public FileUploader(ILogger<FileUploader> logger)
+        public FileUploader(
+            ILogger<FileUploader> logger)
         {
             _logger = logger;
             _baseDirectory = Directory.GetCurrentDirectory(); //TODO: From config? Maybe it will be in another service so it is no need to change on development state
@@ -75,7 +77,7 @@ namespace StreamGateway.Services.Implementations
                 _logger.LogError($"Try to save content which already exist. File path: {filePath}");
                 throw new ConflictException("A file with the same name already exists.");
             }
-
+            
             using (var fileStreamOutput = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
                 await fileStream.CopyToAsync(fileStreamOutput);
