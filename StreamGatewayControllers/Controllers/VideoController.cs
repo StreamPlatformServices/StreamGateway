@@ -1,4 +1,5 @@
 using EncryptionService;
+using KeyServiceAPI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -20,19 +21,22 @@ namespace StreamGateway.Controllers
         private readonly IVideoUploadContract _videoUploadService;
         private readonly IContentMetadataContract _contentMetadataContract;
         private readonly IFileEncryptor _fileEncryptor;
+        private readonly IKeyServiceClient _keyServiceClient;
 
         public VideoController(
             ILogger<VideoController> logger,
             IVideoStreamContract videoStreamService,
             IVideoUploadContract videoUploadService,
             IContentMetadataContract contentMetadataContract,
-            IFileEncryptor fileEncryptor)
+            IFileEncryptor fileEncryptor,
+            IKeyServiceClient keyServiceClient)
         {
             _logger = logger;
             _videoStreamService = videoStreamService;
             _videoUploadService = videoUploadService;
             _contentMetadataContract = contentMetadataContract;
             _fileEncryptor = fileEncryptor;
+            _keyServiceClient = keyServiceClient;
         }
 
         [HttpGet("{contentId}")] //TODO: Maybe make this endpoints less obvious??
@@ -71,6 +75,8 @@ namespace StreamGateway.Controllers
             {
                 return BadRequest("File not provided or empty");
             }
+
+            await _keyServiceClient.CreateEncryptionKeyAsync(videoFileId); //TODO: THink where should it be called!!! and get encryption Key also
 
             var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
 
