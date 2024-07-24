@@ -10,6 +10,7 @@ namespace APIGatewayMain.ServiceCollectionExtensions
             //services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
 
             services.Configure<ContentMetadataServiceApiSettings>(configuration.GetSection("ComponentsSettings:ContentMetadataServiceApiSettings"));
+            services.Configure<KeyServiceClientSettings>(configuration.GetSection("ComponentsSettings:KeyServiceClientSettings"));
 
             return services;
         }

@@ -44,10 +44,12 @@ namespace EncryptionService
                 aes.IV = aesEncryptionKey.KeyData.IV;
 
                 var encryptedStream = new MemoryStream();
-                using (var cryptoStream = new CryptoStream(encryptedStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                using (var cryptoStream = new CryptoStream(encryptedStream, aes.CreateEncryptor(), CryptoStreamMode.Write, leaveOpen: true))
                 {
                     await file.CopyToAsync(cryptoStream);
                 }
+
+                encryptedStream.Position = 0;
 
                 return encryptedStream;
             }

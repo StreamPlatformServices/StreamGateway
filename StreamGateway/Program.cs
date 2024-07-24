@@ -50,6 +50,7 @@ builder.Services.AddTransient<IVideoUploadContract, VideoUploadService>();
 builder.Services.AddTransient<IUriContract, UriService>();
 
 builder.Services.AddContentMetadataServiceAPI();
+builder.Services.AddKeyServiceClient();
 
 //TODO: Use safe cors policy
 builder.Services.AddCors(options =>

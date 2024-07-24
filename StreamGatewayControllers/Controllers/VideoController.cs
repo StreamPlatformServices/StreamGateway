@@ -7,6 +7,7 @@ using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayContracts.IntegrationContracts.Video;
 using StreamGatewayControllers.Models;
 using StreamGatewayCoreUtilities.CommonExceptions;
+using System.IO;
 using System.Net;
 
 namespace StreamGateway.Controllers
@@ -101,15 +102,39 @@ namespace StreamGateway.Controllers
             }
             catch (ConflictException ex)
             {
-                //TODO: maybe log Fatal or something
+                //TODO: maybe log Fatal or something   
                 response.Message = ex.Message;
+
+                try //TODO: Move the try catch to a private method: RollBackEncryptionKey or somethingLikeThis
+                {
+                    await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
+                }
+                catch (Exception deleteEx)
+                {
+                    _logger.LogError($"An error occurred while deleting encryption key. Error message: {deleteEx.Message}");
+                }
+
                 return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
                 response.Message = ex.ToString();
                 _logger.LogError($"An error occurred while uploading video. Error message: {ex.Message}");
+
+                try
+                {
+                    await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
+                }
+                catch (Exception deleteEx)
+                {
+                    _logger.LogError($"An error occurred while deleting encryption key. Error message: {deleteEx.Message}");
+                }
+
                 return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while uploading video. Error message: {ex.Message}");
+            }
+            finally
+            {
+                await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
             }
             //catch (TaskCanceledException)
             //{
