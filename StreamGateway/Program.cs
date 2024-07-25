@@ -1,4 +1,5 @@
-﻿using APIGatewayMain.ServiceCollectionExtensions;
+﻿using APIGatewayCoreUtilities.CommonConfiguration.ConfigurationModels;
+using APIGatewayMain.ServiceCollectionExtensions;
 using EncryptionService;
 using KeyServiceAPI;
 using Microsoft.AspNetCore.Http.Features;
@@ -26,16 +27,8 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCommonConfiguration(builder.Configuration);
-
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.Limits.MaxRequestBodySize = 10737418240; // 10 GB //TODO: Config
-});
-
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 10737418240; // 10 GB
-});
+var kestrelSettings = builder.Configuration.GetSection("KestrelSettings").Get<KestrelSettings>() ?? throw new Exception("Fatal error: Please provide kestrel configuration");
+builder.AddKestrelSettings(kestrelSettings);
 
 // Add services to the container.
 builder.Services.AddTransient<IKeyServiceClient, KeyServiceClient>();
@@ -52,16 +45,16 @@ builder.Services.AddTransient<IUriContract, UriService>();
 builder.Services.AddContentMetadataServiceAPI();
 builder.Services.AddKeyServiceClient();
 
-//TODO: Use safe cors policy
+var corsPolicyName = "CustomCorsPolicy";
+var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>() ?? throw new Exception("Fatal error: Please provide CorsSettings configuration");
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
+    options.AddPolicy(corsPolicyName,
         policy =>
         {
-            policy.WithOrigins("*")
-                  .AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+            policy.WithOrigins(corsSettings.AllowedHosts)
+                .WithHeaders(corsSettings.AllowedHeaders)
+                .WithMethods(corsSettings.AllowedMethods);
         });
 });
 
@@ -71,27 +64,35 @@ builder.Services.AddControllers()
          options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
      });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+var useSwagger = builder.Configuration.GetSection("UseSwagger").Get<bool>();
+
+if (useSwagger)
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "StreamGateway API", Version = "v1" });
-    c.OperationFilter<FileUploadOperation>();
-});
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "StreamGateway API", Version = "v1" });
+        c.OperationFilter<FileUploadOperation>();
+    });
+}
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (useSwagger)
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "StreamGateway API v1");
+        c.RoutePrefix = string.Empty;
     });
 
-    app.UseCors("AllowAll");
+    
 }
+
+app.UseCors(corsPolicyName);
 
 app.UseHttpsRedirection();
 
