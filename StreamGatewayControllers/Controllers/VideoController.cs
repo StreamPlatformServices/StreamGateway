@@ -7,7 +7,6 @@ using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayContracts.IntegrationContracts.Video;
 using StreamGatewayControllers.Models;
 using StreamGatewayCoreUtilities.CommonExceptions;
-using System.IO;
 using System.Net;
 
 namespace StreamGateway.Controllers
