@@ -10,7 +10,7 @@ namespace APIGatewayMain.ServiceCollectionExtensions
         {
             //TODO: Rate limit in stream gateway
             //services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
-
+            services.Configure<KestrelSettings>(configuration.GetSection("KestrelSettings"));
             services.Configure<ContentMetadataServiceApiSettings>(configuration.GetSection("ComponentsSettings:ContentMetadataServiceApiSettings"));
             services.Configure<KeyServiceClientSettings>(configuration.GetSection("ComponentsSettings:KeyServiceClientSettings"));
 

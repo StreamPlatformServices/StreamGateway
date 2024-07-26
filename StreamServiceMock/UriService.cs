@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using APIGatewayCoreUtilities.CommonConfiguration.ConfigurationModels;
+using Microsoft.Extensions.Options;
 using StreamGatewayContracts.IntegrationContracts;
 using System.Configuration;
 
@@ -11,16 +12,20 @@ namespace StreamGateway.Services.Interfaces
 
         //TODO: From config
         private const string SCHEMA      = "https"; 
-        private const string IP_ADDRESS  = "localhost"; 
-        private const int    PORT_NUMBER = 7213; 
-
         //----------------------
+
+        private readonly KestrelSettings _kestrelSettings;
+
+        public UriService(IOptions<KestrelSettings> options)
+        {
+            _kestrelSettings = options.Value;
+        }
 
         public Uri GetImageStreamUri(Guid contentId)
         {
             try
             {
-                return new Uri($"{SCHEMA}://{IP_ADDRESS}:{PORT_NUMBER}/{IMAGE_ENDPOINT}/{contentId}");
+                return new Uri($"{SCHEMA}://{_kestrelSettings.ListeningIPv4Address}:{_kestrelSettings.TlsPortNumber}/{IMAGE_ENDPOINT}/{contentId}");
             }
             catch (UriFormatException ex)
             {
@@ -32,7 +37,7 @@ namespace StreamGateway.Services.Interfaces
         {
             try
             {
-                return new Uri($"{SCHEMA}://{IP_ADDRESS}:{PORT_NUMBER}/{VIDEO_ENDPOINT}/{contentId}");
+                return new Uri($"{SCHEMA}://{_kestrelSettings.ListeningIPv4Address}:{_kestrelSettings.TlsPortNumber}/{VIDEO_ENDPOINT}/{contentId}");
             }
             catch (UriFormatException ex)
             {
