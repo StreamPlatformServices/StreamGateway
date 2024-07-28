@@ -131,14 +131,7 @@ namespace StreamGateway.Controllers
 
                 return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while uploading video. Error message: {ex.Message}");
             }
-            finally
-            {
-                await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
-            }
-            //catch (TaskCanceledException)
-            //{
-
-            //}
+            
         }
 
         [HttpDelete("{contentId}")]
