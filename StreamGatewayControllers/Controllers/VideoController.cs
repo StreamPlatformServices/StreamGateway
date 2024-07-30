@@ -80,16 +80,27 @@ namespace StreamGateway.Controllers
 
             var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
 
+            var tempFilePath = Path.GetTempFileName();
+
             try
             {
-                using (var memoryStream = new MemoryStream())
+                //TODO: It was working on memmory stream (the issue was not enough space)
+                using (var encryptedFileStream = new FileStream(tempFilePath, FileMode.Create))
                 {
-                    await formFile.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
+                    using (var inputStream = formFile.OpenReadStream())
+                    {
+                        await _fileEncryptor.EncryptAES(videoFileId, inputStream, encryptedFileStream);
+                    }
+                }
 
-                    var encryptedStream = await _fileEncryptor.EncryptAES(videoFileId, memoryStream);
+                // TODO: decouple this functionality:
+                // 1. creating temp file <encryptionService> 
+                // 2. accept file by administrator <encryption service?>
+                // 3. save file in repository (encryptionService->streamService))
 
-                    await _videoUploadService.UploadVideoAsync(videoFileId.ToString(), encryptedStream);
+                using (var encryptedFileStream = new FileStream(tempFilePath, FileMode.Open))
+                {
+                    await _videoUploadService.UploadVideoAsync(videoFileId.ToString(), encryptedFileStream);
                 }
 
                 _logger.LogInformation("Video uploaded successfully file id: {videoFileId}", videoFileId);
@@ -131,7 +142,15 @@ namespace StreamGateway.Controllers
 
                 return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while uploading video. Error message: {ex.Message}");
             }
-            
+            finally
+            {
+                // Usuwanie tymczasowego pliku
+                if (System.IO.File.Exists(tempFilePath))
+                {
+                    System.IO.File.Delete(tempFilePath);
+                }
+            }
+
         }
 
         [HttpDelete("{contentId}")]

@@ -2,6 +2,6 @@
 {
     public interface IFileEncryptor
     {
-        Task<Stream> EncryptAES(Guid fileId, Stream file);
+        Task EncryptAES(Guid fileId, Stream inputFile, Stream outputFile);
     }
 }

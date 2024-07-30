@@ -13,7 +13,7 @@ namespace EncryptionService
         {
             _keyServiceClient = keyServiceClient;
         }
-        public async Task<Stream> EncryptAES(Guid fileId, Stream file) //TODO: create exception logic in KeyServiceClient!!
+        public async Task EncryptAES(Guid fileId, Stream inputFile, Stream outputFile)
         {
             var aesEncryptionKey = await _keyServiceClient.GetEncryptionKeyAsync(fileId);
             if (aesEncryptionKey.Status != ResultStatus.Success)
@@ -35,25 +35,20 @@ namespace EncryptionService
             if (aesEncryptionKey.KeyData.IV == null || aesEncryptionKey.KeyData.IV.Length == 0)
                 throw new ArgumentException("IV cannot be null or empty", nameof(aesEncryptionKey.KeyData.IV));
 
-            if (file == null || file.Length == 0)
-                throw new ArgumentException("File cannot be null or empty", nameof(file));
+            if (inputFile == null || inputFile.Length == 0)
+                throw new ArgumentException("File cannot be null or empty", nameof(inputFile));
 
             using (var aes = Aes.Create())
             {
                 aes.Key = aesEncryptionKey.KeyData.Key;
                 aes.IV = aesEncryptionKey.KeyData.IV;
 
-                var encryptedStream = new MemoryStream();
-                using (var cryptoStream = new CryptoStream(encryptedStream, aes.CreateEncryptor(), CryptoStreamMode.Write, leaveOpen: true))
+                using (var cryptoStream = new CryptoStream(outputFile, aes.CreateEncryptor(), CryptoStreamMode.Write, leaveOpen: true))
                 {
-                    await file.CopyToAsync(cryptoStream);
+                    await inputFile.CopyToAsync(cryptoStream);
                 }
-
-                encryptedStream.Position = 0;
-
-                return encryptedStream;
             }
         }
-        
+
     }
 }
