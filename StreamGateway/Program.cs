@@ -40,6 +40,7 @@ builder.AddKestrelSettings(kestrelSettings);
 // Add services to the container.
 builder.Services.AddTransient<IKeyServiceClient, KeyServiceClient>();
 builder.Services.AddTransient<IFileEncryptor, FileEncryptor>();
+builder.Services.AddTransient<IFileDecryptor, FileDecryptor>();
 builder.Services.AddTransient<IFileUploader, FileUploader>();
 builder.Services.AddTransient<IImageStreamContract, ImageStreamService>(); //TODO: Change service to Contract in name, move to extension methods
 builder.Services.AddTransient<IImageUploadContract, ImageUploadService>();

@@ -1,6 +1,7 @@
 using EncryptionService;
 using KeyServiceAPI;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StreamGatewayContracts.IntegrationContracts;
@@ -21,7 +22,10 @@ namespace StreamGateway.Controllers
         private readonly IVideoUploadContract _videoUploadService;
         private readonly IContentMetadataContract _contentMetadataContract;
         private readonly IFileEncryptor _fileEncryptor;
+        private readonly IFileDecryptor _fileDecryptor;
         private readonly IKeyServiceClient _keyServiceClient;
+
+        
 
         public VideoController(
             ILogger<VideoController> logger,
@@ -29,6 +33,7 @@ namespace StreamGateway.Controllers
             IVideoUploadContract videoUploadService,
             IContentMetadataContract contentMetadataContract,
             IFileEncryptor fileEncryptor,
+            IFileDecryptor fileDecryptor,
             IKeyServiceClient keyServiceClient)
         {
             _logger = logger;
@@ -36,6 +41,7 @@ namespace StreamGateway.Controllers
             _videoUploadService = videoUploadService;
             _contentMetadataContract = contentMetadataContract;
             _fileEncryptor = fileEncryptor;
+            _fileDecryptor = fileDecryptor;
             _keyServiceClient = keyServiceClient;
         }
 
@@ -59,6 +65,79 @@ namespace StreamGateway.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, $"Internal server error: {ex.Message}");
             }
             
+        }
+
+        //TODO: it's a development test endpoint
+        [HttpPost("decrypt/{videoFileId}")]
+        public async Task<IActionResult> DecryptVideo([FromRoute] Guid videoFileId)
+        {   
+            var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "videos", $"{videoFileId}.mp4");
+
+            var tempFilePath = Path.GetTempFileName();
+
+            try
+            {
+                using (var decryptedFileStream = new FileStream(tempFilePath, FileMode.Create))
+                {
+                    using (var inputStream = new FileStream(filePath, FileMode.Open))
+                    {
+                        await _fileDecryptor.DecryptAES(videoFileId, inputStream, decryptedFileStream);
+                    }
+                }
+
+                using (var decryptedFileStream = new FileStream(tempFilePath, FileMode.Open))
+                {
+                    await _videoUploadService.UploadVideoAsync("DECRYPTED", decryptedFileStream);
+                }
+
+                _logger.LogInformation("Video uploaded successfully file id: {videoFileId}", videoFileId);
+
+                response.Message = "File uploaded successfully";
+                response.Result.VideoFileId = videoFileId;
+
+                return Ok(response);
+            }
+            catch (ConflictException ex)
+            {
+                //TODO: maybe log Fatal or something   
+                response.Message = ex.Message;
+
+                //try //TODO: Move the try catch to a private method: RollBackEncryptionKey or somethingLikeThis
+                //{
+                //    await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
+                //}
+                //catch (Exception deleteEx)
+                //{
+                //    _logger.LogError($"An error occurred while deleting encryption key. Error message: {deleteEx.Message}");
+                //}
+
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.ToString();
+                _logger.LogError($"An error occurred while uploading video. Error message: {ex.Message}");
+
+                //try
+                //{
+                //    await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
+                //}
+                //catch (Exception deleteEx)
+                //{
+                //    _logger.LogError($"An error occurred while deleting encryption key. Error message: {deleteEx.Message}");
+                //}
+
+                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while uploading video. Error message: {ex.Message}");
+            }
+            finally
+            {
+                if (System.IO.File.Exists(tempFilePath))
+                {
+                    System.IO.File.Delete(tempFilePath);
+                }
+            }
         }
 
         [HttpPost("{videoFileId}")]
@@ -144,7 +223,6 @@ namespace StreamGateway.Controllers
             }
             finally
             {
-                // Usuwanie tymczasowego pliku
                 if (System.IO.File.Exists(tempFilePath))
                 {
                     System.IO.File.Delete(tempFilePath);
