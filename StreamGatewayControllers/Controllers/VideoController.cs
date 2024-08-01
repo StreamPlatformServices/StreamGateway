@@ -44,16 +44,20 @@ namespace StreamGateway.Controllers
             _fileDecryptor = fileDecryptor;
             _keyServiceClient = keyServiceClient;
         }
-
-        [HttpGet("{contentId}")] //TODO: Maybe make this endpoints less obvious??
+        //TODO: Maybe make this endpoints less obvious??
+        [HttpGet("{contentId}")] 
         public IActionResult GetVideoStream([FromRoute] Guid contentId)
         {
             _logger.LogInformation("Start get video stream procedure.");
             try
             {
                 var videoStream = _videoStreamService.GetVideoStream(contentId.ToString());
-                
-                return File(videoStream, "video/mp4");
+
+                Response.Headers.Add("Accept-Ranges", "bytes");
+                Response.Headers.Add("Content-Disposition", "inline; filename=\"video.mp4\""); //TODO: remove
+                Response.Headers.Add("Content-Type", "video/mp4; codecs=\"avc1.64001f, mp4a.40.2\"");
+
+                return File(videoStream, "video/mp4; codecs=\"avc1.64001f, mp4a.40.2\"");
             }
             catch (FileNotFoundException)
             {
