@@ -144,6 +144,79 @@ namespace StreamGateway.Controllers
             }
         }
 
+        //TODO: it's a development test endpoint
+        [HttpPost("encrypt/{videoFileId}")]
+        public async Task<IActionResult> EncryptVideo([FromRoute] Guid videoFileId)
+        {
+            var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "videos", $"{videoFileId}.mp4");
+
+            var tempFilePath = Path.GetTempFileName();
+
+            try
+            {
+                using (var encryptedFileStream = new FileStream(tempFilePath, FileMode.Create))
+                {
+                    using (var inputStream = new FileStream(filePath, FileMode.Open))
+                    {
+                        await _fileEncryptor.EncryptAES(videoFileId, inputStream, encryptedFileStream);
+                    }
+                }
+
+                using (var encryptedFileStream = new FileStream(tempFilePath, FileMode.Open))
+                {
+                    await _videoUploadService.UploadVideoAsync("ENCRYPTED", encryptedFileStream);
+                }
+
+                _logger.LogInformation("Video uploaded successfully file id: {videoFileId}", videoFileId);
+
+                response.Message = "File uploaded successfully";
+                response.Result.VideoFileId = videoFileId;
+
+                return Ok(response);
+            }
+            catch (ConflictException ex)
+            {
+                //TODO: maybe log Fatal or something   
+                response.Message = ex.Message;
+
+                //try //TODO: Move the try catch to a private method: RollBackEncryptionKey or somethingLikeThis
+                //{
+                //    await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
+                //}
+                //catch (Exception deleteEx)
+                //{
+                //    _logger.LogError($"An error occurred while deleting encryption key. Error message: {deleteEx.Message}");
+                //}
+
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.ToString();
+                _logger.LogError($"An error occurred while uploading video. Error message: {ex.Message}");
+
+                //try
+                //{
+                //    await _keyServiceClient.DeleteEncryptionKeyAsync(videoFileId);
+                //}
+                //catch (Exception deleteEx)
+                //{
+                //    _logger.LogError($"An error occurred while deleting encryption key. Error message: {deleteEx.Message}");
+                //}
+
+                return StatusCode((int)HttpStatusCode.InternalServerError, $"An error occurred while uploading video. Error message: {ex.Message}");
+            }
+            finally
+            {
+                if (System.IO.File.Exists(tempFilePath))
+                {
+                    System.IO.File.Delete(tempFilePath);
+                }
+            }
+        }
+
         [HttpPost("{videoFileId}")]
         public async Task<IActionResult> UploadVideo([FromRoute] Guid videoFileId, [FromForm(Name = "file")] IFormFile formFile)
         {
