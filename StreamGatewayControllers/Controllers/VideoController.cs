@@ -77,7 +77,7 @@ namespace StreamGateway.Controllers
         {   
             var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "videos", $"{videoFileId}.mp4");
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "videos", $"{videoFileId}.webm");
 
             var tempFilePath = Path.GetTempFileName();
 
@@ -150,7 +150,7 @@ namespace StreamGateway.Controllers
         {
             var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "videos", $"{videoFileId}.mp4");
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "videos", $"{videoFileId}.webm");
 
             var tempFilePath = Path.GetTempFileName();
 

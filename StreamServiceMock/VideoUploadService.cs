@@ -10,7 +10,7 @@ namespace StreamGateway.Services.Interfaces
         private readonly IFileUploader _fileUploader;
 
         private const string VIDEO_FOLDER_NAME = "videos"; //TODO: Config
-        private const string MP4_EXTENSION = ".mp4";
+        private const string MP4_EXTENSION = ".webm";
 
         public VideoUploadService(
             ILogger<VideoUploadService> logger,
