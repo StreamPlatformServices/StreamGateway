@@ -8,6 +8,7 @@ namespace StreamGateway.Services.Interfaces
         private readonly ILogger<VideoStreamService> _logger;
         private readonly string _videoDirectory;
         private const int BUFFER_SIZE = 4096;
+        private const string FILE_EXTENSION = ".webm";
 
         public VideoStreamService(ILogger<VideoStreamService> logger) //TOOD: Create file streamer???
         {
@@ -17,7 +18,7 @@ namespace StreamGateway.Services.Interfaces
 
         public Stream GetVideoStream(string videoFileName)
         {
-            var videoPath = Path.Combine(_videoDirectory, $"{videoFileName}.mp4"); //TODO: Configure formats
+            var videoPath = Path.Combine(_videoDirectory, $"{videoFileName}{FILE_EXTENSION}"); //TODO: Configure formats
 
             if (!File.Exists(videoPath))
             {

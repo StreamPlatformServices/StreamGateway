@@ -54,10 +54,10 @@ namespace StreamGateway.Controllers
                 var videoStream = _videoStreamService.GetVideoStream(contentId.ToString());
 
                 Response.Headers.Add("Accept-Ranges", "bytes");
-                Response.Headers.Add("Content-Disposition", "inline; filename=\"video.mp4\""); //TODO: remove
-                Response.Headers.Add("Content-Type", "video/mp4; codecs=\"avc1.64001f, mp4a.40.2\"");
+                //Response.Headers.Add("Content-Disposition", "inline; filename=\"video.mp4\""); //TODO: remove
+                Response.Headers.Add("Content-Type", "video/webm; codecs=\"vp8, vorbis\"");
 
-                return File(videoStream, "video/mp4; codecs=\"avc1.64001f, mp4a.40.2\"");
+                return File(videoStream, "video/webm; codecs=\"vp8, vorbis\"");
             }
             catch (FileNotFoundException)
             {
