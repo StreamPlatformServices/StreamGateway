@@ -9,7 +9,7 @@ namespace StreamGateway.Services.Interfaces
     public class VideoUploadService : IVideoUploadContract
     {
         private readonly ILogger<VideoUploadService> _logger;
-        private readonly ViedoFileSettings _videoFileSettings;
+        private readonly VideoFileSettings _videoFileSettings;
         private readonly IFileUploader _fileUploader;
 
         private const string VIDEO_FOLDER_NAME = "videos"; //TODO: Config??

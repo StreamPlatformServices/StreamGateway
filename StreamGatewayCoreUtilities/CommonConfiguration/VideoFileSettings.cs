@@ -1,6 +1,6 @@
 ﻿namespace StreamGatewayCoreUtilities.CommonConfiguration
 {
-    public class ViedoFileSettings
+    public class VideoFileSettings
     {
         public string FileFormat { get; set; } = "webm";
         public string AudioCodec { get; set; } = "vp8";

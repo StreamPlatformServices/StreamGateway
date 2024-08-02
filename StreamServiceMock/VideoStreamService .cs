@@ -8,7 +8,7 @@ namespace StreamGateway.Services.Interfaces
     public class VideoStreamService : IVideoStreamContract
     {
         private readonly ILogger<VideoStreamService> _logger;
-        private readonly ViedoFileSettings _videoFileSettings;
+        private readonly VideoFileSettings _videoFileSettings;
         private readonly string _videoDirectory;
         private const int BUFFER_SIZE = 4096;
         private const string VIDEO_FOLDER_NAME = "videos";

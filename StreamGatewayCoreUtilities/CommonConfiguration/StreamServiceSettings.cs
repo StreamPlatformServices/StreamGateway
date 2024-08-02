@@ -3,6 +3,6 @@
     
     public class StreamServiceSettings
     {
-        public ViedoFileSettings VideoFileSettings { get; set; }
+        public VideoFileSettings VideoFileSettings { get; set; }
     }
 }

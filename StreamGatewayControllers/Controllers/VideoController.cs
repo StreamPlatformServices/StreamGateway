@@ -26,7 +26,7 @@ namespace StreamGateway.Controllers
         private readonly IFileEncryptor _fileEncryptor;
         private readonly IFileDecryptor _fileDecryptor;
         private readonly IKeyServiceClient _keyServiceClient;
-        private readonly ViedoFileSettings _videoFileSettings;
+        private readonly VideoFileSettings _videoFileSettings;
 
 
 
