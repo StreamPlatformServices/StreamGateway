@@ -44,6 +44,7 @@ namespace EncryptionService
                 aes.IV = aesEncryptionKey.KeyData.IV;
 
                 aes.Mode = CipherMode.CFB;
+                aes.Padding = PaddingMode.None;
 
                 using (var cryptoStream = new CryptoStream(outputFile, aes.CreateEncryptor(), CryptoStreamMode.Write, leaveOpen: true))
                 {
