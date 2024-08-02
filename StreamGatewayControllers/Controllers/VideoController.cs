@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayContracts.IntegrationContracts.Video;
 using StreamGatewayControllers.Models;
+using StreamGatewayCoreUtilities.CommonConfiguration;
 using StreamGatewayCoreUtilities.CommonExceptions;
 using System.Net;
 
@@ -24,8 +26,9 @@ namespace StreamGateway.Controllers
         private readonly IFileEncryptor _fileEncryptor;
         private readonly IFileDecryptor _fileDecryptor;
         private readonly IKeyServiceClient _keyServiceClient;
+        private readonly ViedoFileSettings _videoFileSettings;
 
-        
+
 
         public VideoController(
             ILogger<VideoController> logger,
@@ -34,7 +37,8 @@ namespace StreamGateway.Controllers
             IContentMetadataContract contentMetadataContract,
             IFileEncryptor fileEncryptor,
             IFileDecryptor fileDecryptor,
-            IKeyServiceClient keyServiceClient)
+            IKeyServiceClient keyServiceClient,
+            IOptions<StreamServiceSettings> options)
         {
             _logger = logger;
             _videoStreamService = videoStreamService;
@@ -43,6 +47,7 @@ namespace StreamGateway.Controllers
             _fileEncryptor = fileEncryptor;
             _fileDecryptor = fileDecryptor;
             _keyServiceClient = keyServiceClient;
+            _videoFileSettings = options.Value.VideoFileSettings;
         }
         //TODO: Maybe make this endpoints less obvious??
         [HttpGet("{contentId}")] 
@@ -54,10 +59,11 @@ namespace StreamGateway.Controllers
                 var videoStream = _videoStreamService.GetVideoStream(contentId.ToString());
 
                 Response.Headers.Add("Accept-Ranges", "bytes");
-                //Response.Headers.Add("Content-Disposition", "inline; filename=\"video.mp4\""); //TODO: remove
-                Response.Headers.Add("Content-Type", "video/webm; codecs=\"vp8, vorbis\"");
 
-                return File(videoStream, "video/webm; codecs=\"vp8, vorbis\"");
+                var contentType = $"video/{_videoFileSettings.FileFormat}; codecs=\"{_videoFileSettings.VideoCodec}, {_videoFileSettings.AudioCodec}\"";
+                Response.Headers.Add("Content-Type", contentType);
+
+                return File(videoStream, contentType);
             }
             catch (FileNotFoundException)
             {

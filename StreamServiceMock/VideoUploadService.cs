@@ -1,30 +1,34 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StreamGatewayContracts.IntegrationContracts;
 using StreamGatewayContracts.IntegrationContracts.Video;
+using StreamGatewayCoreUtilities.CommonConfiguration;
 
 namespace StreamGateway.Services.Interfaces
 {
     public class VideoUploadService : IVideoUploadContract
     {
         private readonly ILogger<VideoUploadService> _logger;
+        private readonly ViedoFileSettings _videoFileSettings;
         private readonly IFileUploader _fileUploader;
 
-        private const string VIDEO_FOLDER_NAME = "videos"; //TODO: Config
-        private const string MP4_EXTENSION = ".webm";
+        private const string VIDEO_FOLDER_NAME = "videos"; //TODO: Config??
 
         public VideoUploadService(
             ILogger<VideoUploadService> logger,
-            IFileUploader fileUploader)
+            IFileUploader fileUploader,
+            IOptions<StreamServiceSettings> options)
         {
             _logger = logger;
             _fileUploader = fileUploader;
+            _videoFileSettings = options.Value.VideoFileSettings;
         }
 
         public async Task UploadVideoAsync(string fileName, Stream fileStream)
         {
             try
             {
-                await _fileUploader.UploadFileAsync(VIDEO_FOLDER_NAME, $"{fileName}{MP4_EXTENSION}", fileStream);
+                await _fileUploader.UploadFileAsync(VIDEO_FOLDER_NAME, $"{fileName}.{_videoFileSettings.FileFormat}", fileStream);
             }
             catch (IOException ex)
             {
@@ -46,7 +50,7 @@ namespace StreamGateway.Services.Interfaces
 
         public async Task RemoveVideoAsync(string fileName)
         {
-            await _fileUploader.RemoveFileAsync(VIDEO_FOLDER_NAME, $"{fileName}{MP4_EXTENSION}");
+            await _fileUploader.RemoveFileAsync(VIDEO_FOLDER_NAME, $"{fileName}.{_videoFileSettings.FileFormat}");
         }
     }
 }

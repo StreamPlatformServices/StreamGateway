@@ -1,24 +1,30 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StreamGatewayContracts.IntegrationContracts.Video;
+using StreamGatewayCoreUtilities.CommonConfiguration;
 
 namespace StreamGateway.Services.Interfaces
 {
     public class VideoStreamService : IVideoStreamContract
     {
         private readonly ILogger<VideoStreamService> _logger;
+        private readonly ViedoFileSettings _videoFileSettings;
         private readonly string _videoDirectory;
         private const int BUFFER_SIZE = 4096;
-        private const string FILE_EXTENSION = ".webm";
+        private const string VIDEO_FOLDER_NAME = "videos";
 
-        public VideoStreamService(ILogger<VideoStreamService> logger) //TOOD: Create file streamer???
+        public VideoStreamService(
+            ILogger<VideoStreamService> logger,
+            IOptions<StreamServiceSettings> options) //TOOD: Create file streamer???
         {
-            _videoDirectory = Path.Combine(Directory.GetCurrentDirectory(), "videos"); //TODO: config
+            _videoDirectory = Path.Combine(Directory.GetCurrentDirectory(), VIDEO_FOLDER_NAME); //TODO: config
             _logger = logger;
+            _videoFileSettings = options.Value.VideoFileSettings;
         }
 
         public Stream GetVideoStream(string videoFileName)
         {
-            var videoPath = Path.Combine(_videoDirectory, $"{videoFileName}{FILE_EXTENSION}"); //TODO: Configure formats
+            var videoPath = Path.Combine(_videoDirectory, $"{videoFileName}.{_videoFileSettings.FileFormat}"); //TODO: Configure formats
 
             if (!File.Exists(videoPath))
             {

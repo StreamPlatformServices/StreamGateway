@@ -1,6 +1,7 @@
 ﻿using APIGatewayCoreUtilities.CommonConfiguration.ConfigurationModels;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
+using StreamGatewayCoreUtilities.CommonConfiguration;
 
 namespace APIGatewayMain.ServiceCollectionExtensions
 {
@@ -13,6 +14,7 @@ namespace APIGatewayMain.ServiceCollectionExtensions
             services.Configure<KestrelSettings>(configuration.GetSection("KestrelSettings"));
             services.Configure<ContentMetadataServiceApiSettings>(configuration.GetSection("ComponentsSettings:ContentMetadataServiceApiSettings"));
             services.Configure<KeyServiceClientSettings>(configuration.GetSection("ComponentsSettings:KeyServiceClientSettings"));
+            services.Configure<StreamServiceSettings>(configuration.GetSection("ComponentsSettings:StreamServiceSettings"));
 
             return services;
         }

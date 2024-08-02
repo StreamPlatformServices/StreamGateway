@@ -43,6 +43,8 @@ namespace EncryptionService
                 aes.Key = aesEncryptionKey.KeyData.Key;
                 aes.IV = aesEncryptionKey.KeyData.IV;
 
+                aes.Mode = CipherMode.CFB;
+
                 using (var cryptoStream = new CryptoStream(inputFile, aes.CreateDecryptor(), CryptoStreamMode.Read))
                 {
                     await cryptoStream.CopyToAsync(outputFile);
