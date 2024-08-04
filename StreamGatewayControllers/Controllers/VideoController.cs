@@ -1,7 +1,6 @@
 using EncryptionService;
 using KeyServiceAPI;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -60,7 +59,7 @@ namespace StreamGateway.Controllers
 
                 Response.Headers.Add("Accept-Ranges", "bytes");
 
-                var contentType = $"video/{_videoFileSettings.FileFormat}; codecs=\"{_videoFileSettings.VideoCodec}, {_videoFileSettings.AudioCodec}\"";
+                var contentType = $"video/{_videoFileSettings.FileFormat}; codecs=\"{_videoFileSettings.AudioCodec}, {_videoFileSettings.VideoCodec}\"";
                 Response.Headers.Add("Content-Type", contentType);
 
                 return File(videoStream, contentType);
@@ -259,6 +258,8 @@ namespace StreamGateway.Controllers
                 // 1. creating temp file <encryptionService> 
                 // 2. accept file by administrator <encryption service?>
                 // 3. save file in repository (encryptionService->streamService))
+
+                //TODO: video file should be decrypted for acceptance purpose?
 
                 using (var encryptedFileStream = new FileStream(tempFilePath, FileMode.Open))
                 {

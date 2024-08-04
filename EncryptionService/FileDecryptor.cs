@@ -1,7 +1,6 @@
 ﻿using KeyServiceAPI;
 using KeyServiceAPI.Models;
 using StreamGatewayCoreUtilities.CommonExceptions;
-using System.Net;
 using System.Security.Cryptography;
 
 namespace EncryptionService
@@ -43,8 +42,8 @@ namespace EncryptionService
                 aes.Key = aesEncryptionKey.KeyData.Key;
                 aes.IV = aesEncryptionKey.KeyData.IV;
 
-                aes.Mode = CipherMode.CFB;
-                aes.Padding = PaddingMode.None;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
 
                 using (var cryptoStream = new CryptoStream(inputFile, aes.CreateDecryptor(), CryptoStreamMode.Read))
                 {
