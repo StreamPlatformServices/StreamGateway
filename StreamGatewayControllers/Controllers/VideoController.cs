@@ -237,8 +237,13 @@ namespace StreamGateway.Controllers
                 return BadRequest("File not provided or empty");
             }
 
-            await _keyServiceClient.CreateEncryptionKeyAsync(videoFileId); //TODO: THink where should it be called!!! and get encryption Key also
-
+            //TOOD:
+            var useblockChain = true; //TODO: cleanup this logic to be extendable not modificable
+            if (!useblockChain)
+            {
+                await _keyServiceClient.CreateEncryptionKeyAsync(videoFileId); //TODO: THink where should it be called!!! and get encryption Key also
+            }
+            
             var response = new ResponseModel<VideoUploadResponseModel> { Result = new VideoUploadResponseModel() };
 
             var tempFilePath = Path.GetTempFileName();

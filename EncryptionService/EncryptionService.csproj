@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Nethereum.Web3" Version="4.26.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\LicenseService\KeyServiceAPI\KeyServiceAPI.csproj" />
     <ProjectReference Include="..\StreamGatewayCoreUtilities\StreamGatewayCoreUtilities.csproj" />
   </ItemGroup>

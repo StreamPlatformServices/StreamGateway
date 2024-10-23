@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 
 namespace EncryptionService
 {
-    public class FileDecryptor : IFileDecryptor
+    public class FileDecryptor : IFileDecryptor //TODO: add flag to configuration useblockchain 
     {
         private readonly IKeyServiceClient _keyServiceClient;
         public FileDecryptor(IKeyServiceClient keyServiceClient)
