@@ -57,11 +57,11 @@ namespace EncryptionService
                     });
                 }
 
-                var publicKey = await _blockchainClient.GetPublicKeyFromWalletAsync(_privateKey);
+                //var publicKey = await _blockchainClient.GetPublicKeyFromWalletAsync(_privateKey);
 
-                var encryptedAesKey = EncryptAESWithPublicKey(aesEncryptionKey.KeyData.Key, publicKey);
+               // var encryptedAesKey = EncryptAESWithPublicKey(aesEncryptionKey.KeyData.Key, publicKey);
 
-                var transactionHash = await _blockchainClient.SendEncryptedKeyToBlockchainAsync(fileId, encryptedAesKey, aesEncryptionKey.KeyData.IV);
+                var transactionHash = await _blockchainClient.SendEncryptedKeyToBlockchainAsync(fileId, aesEncryptionKey.KeyData.Key, aesEncryptionKey.KeyData.IV);
 
                 if (string.IsNullOrEmpty(transactionHash))
                 {
