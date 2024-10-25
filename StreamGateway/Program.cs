@@ -102,7 +102,11 @@ if (useSwagger)
 
 app.UseCors(corsPolicyName);
 
-app.UseHttpsRedirection();
+if (kestrelSettings.UseTls)
+{
+    app.UseHttpsRedirection();
+}
+
 
 app.UseAuthorization();
 

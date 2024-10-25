@@ -11,7 +11,8 @@ namespace StreamGateway.Services.Interfaces
         private const string IMAGE_ENDPOINT  = "image";
 
         //TODO: From config
-        private const string SCHEMA      = "https"; 
+        private const string SCHEMA      = "http"; 
+        private const string SCHEMA_SSL      = "https"; 
         //----------------------
 
         private readonly KestrelSettings _kestrelSettings;
@@ -23,9 +24,16 @@ namespace StreamGateway.Services.Interfaces
 
         public Uri GetImageStreamUri(Guid contentId)
         {
+            
             try
             {
-                return new Uri($"{SCHEMA}://{_kestrelSettings.ListeningIPv4Address}:{_kestrelSettings.TlsPortNumber}/{IMAGE_ENDPOINT}/{contentId}");
+                if (_kestrelSettings.UseTls)
+                {
+                    return new Uri($"{SCHEMA_SSL}://{_kestrelSettings.StreamingIPv4Address}:{_kestrelSettings.TlsPortNumber}/{IMAGE_ENDPOINT}/{contentId}");
+                }
+
+                return new Uri($"{SCHEMA}://{_kestrelSettings.StreamingIPv4Address}:{_kestrelSettings.PortNumber}/{IMAGE_ENDPOINT}/{contentId}");
+
             }
             catch (UriFormatException ex)
             {
@@ -37,7 +45,13 @@ namespace StreamGateway.Services.Interfaces
         {
             try
             {
-                return new Uri($"{SCHEMA}://{_kestrelSettings.ListeningIPv4Address}:{_kestrelSettings.TlsPortNumber}/{VIDEO_ENDPOINT}/{contentId}");
+                if (_kestrelSettings.UseTls)
+                {
+                    return new Uri($"{SCHEMA_SSL}://{_kestrelSettings.StreamingIPv4Address}:{_kestrelSettings.TlsPortNumber}/{VIDEO_ENDPOINT}/{contentId}");
+                }
+
+                return new Uri($"{SCHEMA}://{_kestrelSettings.StreamingIPv4Address}:{_kestrelSettings.PortNumber}/{VIDEO_ENDPOINT}/{contentId}");
+                
             }
             catch (UriFormatException ex)
             {
